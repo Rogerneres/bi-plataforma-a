@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BI de Metas — Plataforma A</title>
+<style>
+:root{
+  --bg:#f0ede6;--card:#fff;--border:#e0ddd4;--text:#1c1b18;--muted:#6e6c67;
+  --hint:#9e9b95;--r:10px;--r-sm:6px;
+  --green:#3B6D11;--green-bg:#EAF3DE;
+  --amber:#854F0B;--amber-bg:#FEF4E6;
+  --red:#A32D2D;--red-bg:#FCEBEB;
+  --purple:#534AB7;--purple-bg:#EEEDFE;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5}
+b{font-weight:500}
+
+/* ── PAGE ── */
+.page{max-width:1200px;margin:0 auto;padding:1.25rem 1rem 3rem}
+
+/* ── HEADER ── */
+.header{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:1rem 1.5rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.header-left h1{font-size:17px;font-weight:500}
+.header-left p{font-size:12px;color:var(--muted);margin-top:2px}
+.header-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tag{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+.tag-blue{background:#EBF4FF;color:#0C447C;border:0.5px solid #B5D4F4}
+.tag-green{background:var(--green-bg);color:var(--green);border:0.5px solid #C0DD97}
+.tag-date{background:var(--bg);color:var(--muted);border:0.5px solid var(--border)}
+.update-dot{width:7px;height:7px;border-radius:50%;background:#639922;display:inline-block;margin-right:4px;vertical-align:middle}
+
+/* ── TABS ── */
+.tabs-nav{display:flex;gap:2px;overflow-x:auto;padding-bottom:1px;margin-bottom:1rem;scrollbar-width:none}
+.tabs-nav::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;padding:7px 16px;border-radius:var(--r-sm);border:0.5px solid transparent;background:transparent;cursor:pointer;font-size:12px;font-weight:500;color:var(--muted);transition:all .15s;white-space:nowrap}
+.tab-btn:hover{background:var(--card);border-color:var(--border);color:var(--text)}
+.tab-btn.active{background:var(--card);border-color:var(--border);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.tab-indicator{width:18px;height:3px;border-radius:2px;margin:4px auto 0;opacity:0}
+.tab-btn.active .tab-indicator{opacity:1}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── CARDS / GRID ── */
+.card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:1rem}
+.card-sm{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:.75rem 1rem}
+.card-title{font-size:10px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.625rem}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.row{margin-bottom:12px}
+
+/* ── KPI CARD ── */
+.kpi{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:.9rem 1rem}
+.kpi-val{font-size:26px;font-weight:500;line-height:1.1;margin-bottom:3px}
+.kpi-label{font-size:11px;color:var(--muted)}
+.kpi-sub{font-size:11px;color:var(--hint);margin-top:4px}
+.kpi-bar{height:3px;border-radius:2px;background:#eee;margin-top:8px}
+.kpi-bar-fill{height:3px;border-radius:2px}
+
+/* ── STATUS PILL ── */
+.pill{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block;white-space:nowrap}
+.pg{background:var(--green-bg);color:var(--green)}
+.pa{background:var(--amber-bg);color:var(--amber)}
+.pr{background:var(--red-bg);color:var(--red)}
+.pp{background:var(--purple-bg);color:var(--purple)}
+.pn{background:var(--bg);color:var(--hint)}
+
+/* ── CHART WRAPPER ── */
+.chart-wrap{position:relative;width:100%}
+.chart-wrap canvas{display:block}
+.gauge-center{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none}
+.gauge-pct{font-size:28px;font-weight:500}
+.gauge-label{font-size:10px;color:var(--muted);margin-top:1px}
+
+/* ── PROJECT ACCORDION ── */
+.proj-list{display:flex;flex-direction:column;gap:6px}
+.proj-item{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-sm);overflow:hidden}
+.proj-hdr{display:flex;align-items:center;gap:10px;padding:.7rem 1rem;cursor:pointer;user-select:none;transition:background .1s}
+.proj-hdr:hover{background:#fafaf7}
+.proj-hdr-name{flex:1;font-weight:500;font-size:12px}
+.proj-hdr-bar{width:120px;height:6px;background:var(--bg);border-radius:3px;position:relative;flex-shrink:0}
+.proj-hdr-bar-fill{height:6px;border-radius:3px;transition:width .4s}
+.proj-hdr-target{position:absolute;top:-3px;width:1.5px;height:12px}
+.proj-hdr-pct{font-size:12px;font-weight:500;min-width:38px;text-align:right}
+.proj-chevron{font-size:11px;color:var(--hint);transition:transform .2s;flex-shrink:0}
+.proj-chevron.open{transform:rotate(180deg)}
+.proj-body{display:none;padding:.875rem 1rem;border-top:0.5px solid var(--border);background:#fafaf8}
+.proj-body.open{display:block}
+.proj-note{font-size:10px;padding:1px 7px;border-radius:4px;margin-left:6px;vertical-align:middle;font-weight:400}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:10px;color:var(--hint);padding:5px 8px;text-align:center;border-bottom:0.5px solid var(--border);font-weight:600;letter-spacing:.03em;text-transform:uppercase}
+.tbl td{font-size:12px;padding:5px 8px;text-align:center;border-bottom:0.5px solid #f2efea}
+.tbl td.l{text-align:left;font-weight:500}
+.tbl tr.total td{background:#f5f3ee;font-weight:600;border-top:0.5px solid var(--border)}
+.tbl tr.zero td{opacity:.4}
+.tbl .mini-bar-cell{width:80px;padding:5px 8px}
+.mini-bar{height:4px;background:#eee;border-radius:2px}
+.mini-bar-fill{height:4px;border-radius:2px}
+
+/* ── BREAKDOWN BOX ── */
+.breakdown{margin-top:.625rem;padding:.5rem .75rem;background:#f5f3ee;border-radius:var(--r-sm);border:0.5px solid var(--border)}
+.breakdown-row{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding:2px 0}
+
+/* ── GROUP HEADER ── */
+.group-hero{border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.group-hero-name{font-size:16px;font-weight:500;flex:1}
+.group-hero-okr{font-size:28px;font-weight:500;min-width:70px;text-align:right}
+
+/* ── OVERVIEW TABLE ── */
+.ov-table-wrap{overflow-x:auto}
+.ov-table{min-width:700px}
+
+/* ── LEGEND ── */
+.legend{display:flex;gap:14px;font-size:11px;color:var(--muted);flex-wrap:wrap;margin-bottom:.625rem}
+.legend-item{display:flex;align-items:center;gap:4px}
+.legend-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+
+/* ── RESPONSIVE ── */
+@media(max-width:750px){
+  .g5{grid-template-columns:repeat(2,1fr)}
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:1fr}
+  .g2{grid-template-columns:1fr}
+  .proj-hdr-bar{width:70px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>BI de Metas — Plataforma A</h1>
+    <p>Análise de produção · Planejado vs. Realizado · OKR mensal e acumulado</p>
+  </div>
+  <div class="header-right">
+    <span class="tag tag-date"><span class="update-dot"></span>Atualizado: <b id="hdrPeriod"></b></span>
+    <span class="tag tag-blue">Período: Jan–<span id="hdrPeriodEnd"></span> 2026</span>
+    <span class="tag tag-green">Meta OKR: 95%</span>
+  </div>
+</div>
+
+<!-- TABS NAV -->
+<div class="tabs-nav" id="tabsNav"></div>
+
+<!-- TAB PANELS -->
+<div id="tabPanels"></div>
+
+</div><!-- /page -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   SEÇÃO DE DADOS — ATUALIZAR MENSALMENTE
+   ═══════════════════════════════════════════════════════════════════
+
+   COMO ATUALIZAR:
+   1. Incremente CONFIG.currentMonth (0=Jan, 1=Fev, ..., 11=Dez)
+   2. Adicione o valor realizado do novo mês em cada projeto abaixo
+      no array "realized", substituindo o próximo "null" pelo valor
+   3. Salve o arquivo — todos os gráficos e métricas se atualizam
+   ═══════════════════════════════════════════════════════════════════ */
+
+Chart.register(ChartDataLabels);
+
+const CONFIG = {
+  currentMonth: 4,          // <-- ATUALIZAR: 0=Jan 1=Fev 2=Mar 3=Abr 4=Mai ...
+  targetOKR:   95,          // meta de atingimento em %
+  year:        2026,
+  months: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+};
+
+const GROUPS = [
+  { id:'avalia',    name:'Avalia',                  color:'#185FA5', bg:'#EBF4FF', text:'#0C3B70' },
+  { id:'lab',       name:'Laboratórios Virtuais',    color:'#0F6E56', bg:'#E4F5EF', text:'#085041' },
+  { id:'ua',        name:'Unidades de Aprendizagem', color:'#3B6D11', bg:'#EAF3DE', text:'#27500A' },
+  { id:'esteiras',  name:'Esteiras com IA',          color:'#854F0B', bg:'#FEF4E6', text:'#5A3408' },
+  { id:'objetos',   name:'Objetos de Aprendizagem',  color:'#7A2D6A', bg:'#F9EAF6', text:'#5A1F4E' },
+  { id:'editorial', name:'Editorial',                color:'#534AB7', bg:'#EEEDFE', text:'#3C3489' },
+];
+
+/* realized: preencha null com o valor quando o mês fechar */
+const PROJECTS = [
+
+  // ── AVALIA ──────────────────────────────────────────────────────────────────
+  { group:'avalia',  name:'Questões Discursivas',
+    planned: [   0,  50,  50,  50,  50,  50,  50,  50,  50,  50,  50,   0],
+    realized:[   0,  50,  50,  50,  50,null,null,null,null,null,null,null] },
+
+  { group:'avalia',  name:'Classificação | Questão UA',
+    planned: [   0, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200,   0],
+    realized:[   0, 200, 200, 200, 200,null,null,null,null,null,null,null] },
+
+  { group:'avalia',  name:'Questões Simulador Enamed',
+    planned: [   0,   0,   0, 100, 100, 100, 100,   0,   0,   0,   0,   0],
+    realized:[   0,   0,   0, 100,   0,null,null,null,null,null,null,null] },
+
+  { group:'avalia',  name:'Classificador de Questão Enamed',
+    planned: [   0,  25,  25,  25,  25,   0,   0,   0,   0,   0,   0,   0],
+    realized:[   0,  25,  25,   0,   0,null,null,null,null,null,null,null] },
+
+  { group:'avalia',  name:'Classificador de Questão Enade',
+    planned: [   0, 250, 250, 250, 250,   0,   0,   0,   0,   0,   0,   0],
+    realized:[   0,   0, 250,  37, 162,null,null,null,null,null,null,null] },
+
+  { group:'avalia',  name:'Classificação Legado',
+    planned: [   0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100,   0],
+    realized:[   0, 100, 100, 100, 100,null,null,null,null,null,null,null] },
+
+  { group:'avalia',  name:'Provas OAB',
+    planned: [   0,   0,   0, 200, 200,   0,   0,   0,   0,   0,   0,   0],
+    realized:[   0,   0,   0,   0,   0,null,null,null,null,null,null,null] },
+
+  { group:'avalia',  name:'Melhoria Contínua – Mackenzie',
+    planned: [   0,   0,   0,   0, 100, 100, 100, 100, 100, 100,  27,   0],
+    realized:[   0,   0,   0,   0,   0,null,null,null,null,null,null,null] },
+
+  // ── LABORATÓRIOS VIRTUAIS ────────────────────────────────────────────────────
+  { group:'lab',     name:'Tradução – Lab. Virtuais',
+    planned: [   0,   0,   0,   4,   5,  10,  15,  15,  15,  10,   0,   0],
+    realized:[   0,   0,   0,   0,   0,null,null,null,null,null,null,null] },
+
+  { group:'lab',     name:'Laboratórios Virtuais',
+    planned: [   0,   0,   0,  12,   0,   0,   0,   0,   2,   2,   2,   2],
+    realized:[   0,   0,  12,   0,   0,null,null,null,null,null,null,null] },
+
+  { group:'lab',     name:'Laboratórios Virtuais – MC',
+    planned: [   0,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   0],
+    realized:[   0,   5,   5,   5,   5,null,null,null,null,null,null,null] },
+
+  // ── UNIDADES DE APRENDIZAGEM ─────────────────────────────────────────────────
+  { group:'ua',      name:'Unidades de Aprendizagem – UAs',
+    planned: [   0,  10,  20,  20,  20,  20,  20,  20,  20,  20,  20,  15],
+    realized:[   0,  10,  20,  20,  20,null,null,null,null,null,null,null] },
+
+  { group:'ua',      name:'Melhoria Contínua – UAs',
+    planned: [   0,  10,  60,  80,  90,  90,  90,  90,  90,  85,  80,  50],
+    realized:[   0,  10,  60,  65,  90,null,null,null,null,null,null,null] },
+
+  // ── ESTEIRAS COM IA ──────────────────────────────────────────────────────────
+  // Resumo UA + Assistentes Pedagógicos (métrica combinada — OKR oficial)
+  // IA realizou: Jan=150 Fev=300 Mar=300 Abr=118 Mai=162 (total=1.030)
+  // Assist. Ped.: Jan=0   Fev=0   Mar=0   Abr=182 Mai=138 (total=320)
+  // Combinado:   Jan=150 Fev=300 Mar=300 Abr=300 Mai=300 (total=1.350)
+  { group:'esteiras', name:'Resumo UA + Assist. Pedagógicos',
+    planned: [ 150, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 150],
+    realized:[ 150, 300, 300, 300, 300,null,null,null,null,null,null,null],
+    breakdown:[
+      { label:'→ Resumo da UA com IA (IA)', realized:[150,300,300,118,162] },
+      { label:'→ Assistentes Pedagógicos',  realized:[  0,  0,  0,182,138] },
+    ]},
+
+  { group:'esteiras', name:'Audiodescrições',
+    planned: [   0,  45,  80,  80,  80,  80,  80,  80,  80,  80,  80,  50],
+    realized:[   0,  45, 108, 121,  91,null,null,null,null,null,null,null] },
+
+  // ── OBJETOS DE APRENDIZAGEM ──────────────────────────────────────────────────
+  { group:'objetos',  name:'MC Vídeos Expositivos',
+    planned: [   0,  12,  12,  12,  12,  12,  14,  15,  12,  12,  12,   0],
+    realized:[   0,  12,  13,   7,  12,null,null,null,null,null,null,null] },
+
+  // ── EDITORIAL ────────────────────────────────────────────────────────────────
+  { group:'editorial',name:'Capítulos Avulsos',
+    planned: [   0,  12,  12,  12,  12,  12,  12,  12,  12,  12,  12,   0],
+    realized:[   0,  12,  12,  12,  12,null,null,null,null,null,null,null] },
+];
+
+/* ═══════════════════════════════════════════════════════════════════
+   CAPACIDADE PRODUTIVA — horas por unidade (fonte: Horas - profissional.pptx)
+   ═══════════════════════════════════════════════════════════════════ */
+const CAP = {
+  hoursPerPerson: 200, // h/mês por pessoa alocada
+  projects: [
+    { name:'Unidades de Aprendizagem – UAs', color:'#3B6D11',
+      planned:[0,10,20,20,20,20,20,20,20,20,20,15],
+      hours:{ DI:22.6, CQ:3.10 } },
+    { name:'Melhoria Contínua – UAs', color:'#854F0B',
+      planned:[0,10,60,80,90,90,90,90,90,85,80,50],
+      hours:{ DI:8.0, CQ:4.75 } },
+  ]
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   ENGINE DE CÁLCULO — NÃO MODIFICAR
+   ═══════════════════════════════════════════════════════════════════ */
+
+const M = CONFIG.currentMonth + 1; // months elapsed
+const MONTHS_PERIOD = CONFIG.months.slice(0, M);
+const MONTHS_ALL    = CONFIG.months;
+
+function rz(v){ return v === null ? 0 : (v||0); }
+function sumSlice(arr, end){ return arr.slice(0,end).reduce((s,v)=>s+rz(v),0); }
+function sumAll(arr){ return arr.reduce((s,v)=>s+rz(v),0); }
+
+function calcOKR(plan, real, months = M){
+  const sp = sumSlice(plan, months);
+  const sr = sumSlice(real, months);
+  if(sp === 0) return null;
+  return +(sr/sp*100).toFixed(1);
+}
+
+function calcMonthOKR(p, r){
+  if(p === 0 && r === 0) return null;
+  if(p === 0 && r > 0)   return 999; // superado sem meta
+  return +(r/p*100).toFixed(1);
+}
+
+function status(pct){
+  if(pct === null) return 'na';
+  if(pct >= 999)   return 'extra';
+  if(pct > 100)    return 'extra';
+  if(pct >= CONFIG.targetOKR) return 'green';
+  if(pct >= 70)    return 'amber';
+  return 'red';
+}
+
+function pillFor(pct){
+  const s = status(pct);
+  if(s==='na')    return `<span class="pill pn">—</span>`;
+  if(s==='extra') return `<span class="pill pp">Superado</span>`;
+  const cls = s==='green'?'pg':s==='amber'?'pa':'pr';
+  return `<span class="pill ${cls}">${pct}%</span>`;
+}
+
+function barColor(pct){
+  const s = status(pct);
+  if(s==='na') return '#ccc';
+  if(s==='extra'||s==='green') return '#639922';
+  if(s==='amber') return '#BA7517';
+  return '#E24B4A';
+}
+
+function groupProjects(gid){ return PROJECTS.filter(p=>p.group===gid); }
+
+function groupStats(gid){
+  const projs = groupProjects(gid);
+  let sp=0, sr=0, nG=0, nA=0, nR=0, nN=0;
+  projs.forEach(p=>{
+    const ps=sumSlice(p.planned,M), rs=sumSlice(p.realized,M);
+    sp+=ps; sr+=rs;
+    const pct=calcOKR(p.planned,p.realized);
+    const st=status(pct);
+    if(ps===0){ nN++; return; }
+    if(st==='green'||st==='extra') nG++;
+    else if(st==='amber') nA++;
+    else nR++;
+  });
+  return { sp, sr, okr:sp>0?+((sr/sp*100).toFixed(1)):null, nG, nA, nR, nN };
+}
+
+// Aggregate monthly planned/realized across all (or group) projects
+function monthlyAgg(projects){
+  const plan=Array(12).fill(0), real=Array(12).fill(0);
+  projects.forEach(p=>{
+    p.planned.forEach((v,i)=>plan[i]+=rz(v));
+    p.realized.forEach((v,i)=>real[i]+=rz(v));
+  });
+  return { plan, real };
+}
+
+// Cumulative arrays
+function cumulative(arr){
+  let s=0; return arr.map(v=>{ s+=rz(v); return s; });
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RENDERING
+   ═══════════════════════════════════════════════════════════════════ */
+
+// Header period labels
+document.getElementById('hdrPeriod').textContent = CONFIG.months[CONFIG.currentMonth]+' '+CONFIG.year;
+document.getElementById('hdrPeriodEnd').textContent = CONFIG.months[CONFIG.currentMonth];
+
+// Charts registry (to manage instances)
+const CHARTS = {};
+
+// ── TAB SETUP ─────────────────────────────────────────────────────────────────
+const tabsNav    = document.getElementById('tabsNav');
+const tabPanels  = document.getElementById('tabPanels');
+
+function buildTabs(){
+  const tabs = [
+    { id:'overview', label:'Visão Geral', color:'#1a1917' },
+    ...GROUPS.map(g=>({ id:g.id, label:g.name, color:g.color })),
+    { id:'capacidade', label:'Capacidade Produtiva', color:'#5B21B6' },
+  ];
+  tabs.forEach((t,i)=>{
+    const btn = document.createElement('button');
+    btn.className='tab-btn'+(i===0?' active':'');
+    btn.dataset.tab=t.id;
+    btn.innerHTML=`${t.label}<div class="tab-indicator" style="background:${t.color}"></div>`;
+    btn.onclick=()=>switchTab(t.id);
+    tabsNav.appendChild(btn);
+  });
+}
+
+let _capChartsBuilt = false;
+let _renderCapCharts = null;
+function switchTab(id){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+id));
+  // Resize charts after show (Chart.js needs visible canvas)
+  setTimeout(()=>Object.values(CHARTS).forEach(c=>c.resize&&c.resize()), 50);
+  // Lazy-render capacity charts on first switch to that tab
+  if(id==='capacidade' && !_capChartsBuilt){ _renderCapCharts(); _capChartsBuilt=true; }
+}
+
+// ── OVERVIEW TAB ──────────────────────────────────────────────────────────────
+function buildOverview(){
+  const panel = document.createElement('div');
+  panel.id='panel-overview'; panel.className='tab-panel active';
+  tabPanels.appendChild(panel);
+
+  // Overall stats
+  const allAgg = monthlyAgg(PROJECTS);
+  const totalPlan = sumSlice(allAgg.plan, M);
+  const totalReal = sumSlice(allAgg.real, M);
+  const totalOKR  = +(totalReal/totalPlan*100).toFixed(1);
+  let nG=0,nA=0,nR=0;
+  PROJECTS.forEach(p=>{
+    const pct=calcOKR(p.planned,p.realized);
+    const st=status(pct);
+    if(sumSlice(p.planned,M)===0) return;
+    if(st==='green'||st==='extra') nG++;
+    else if(st==='amber') nA++;
+    else nR++;
+  });
+  const okrColor = totalOKR>=CONFIG.targetOKR?'#639922':totalOKR>=70?'#BA7517':'#E24B4A';
+
+  panel.innerHTML = `
+  <!-- KPIs -->
+  <div class="g5 row">
+    <div class="kpi" style="border-top:3px solid ${okrColor}">
+      <div class="kpi-label">OKR consolidado</div>
+      <div class="kpi-val" style="color:${okrColor}">${totalOKR}%</div>
+      <div class="kpi-sub">Meta: ${CONFIG.targetOKR}% · Jan–${CONFIG.months[CONFIG.currentMonth]}</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" style="width:${Math.min(totalOKR,100)}%;background:${okrColor}"></div></div>
+    </div>
+    <div class="kpi" style="border-top:3px solid #639922">
+      <div class="kpi-label">Projetos no prazo</div>
+      <div class="kpi-val" style="color:#639922">${nG}</div>
+      <div class="kpi-sub">≥ ${CONFIG.targetOKR}% atingimento</div>
+    </div>
+    <div class="kpi" style="border-top:3px solid #BA7517">
+      <div class="kpi-label">Projetos em risco</div>
+      <div class="kpi-val" style="color:#BA7517">${nA}</div>
+      <div class="kpi-sub">70–94% atingimento</div>
+    </div>
+    <div class="kpi" style="border-top:3px solid #E24B4A">
+      <div class="kpi-label">Projetos abaixo</div>
+      <div class="kpi-val" style="color:#E24B4A">${nR}</div>
+      <div class="kpi-sub">< 70% atingimento</div>
+    </div>
+    <div class="kpi" style="border-top:3px solid #185FA5">
+      <div class="kpi-label">Unidades planejadas (período)</div>
+      <div class="kpi-val" style="color:#185FA5">${totalPlan.toLocaleString('pt-BR')}</div>
+      <div class="kpi-sub">${totalReal.toLocaleString('pt-BR')} realizadas</div>
+    </div>
+  </div>
+
+  <!-- Charts row 1: Gauge + Monthly bar + Group donuts -->
+  <div class="g3 row">
+    <div class="card">
+      <div class="card-title">OKR geral — Jan a ${CONFIG.months[CONFIG.currentMonth]}</div>
+      <div class="chart-wrap" style="height:170px">
+        <canvas id="chartGauge" role="img" aria-label="Gauge OKR ${totalOKR}%"></canvas>
+        <div class="gauge-center">
+          <div class="gauge-pct" style="color:${okrColor}">${totalOKR}%</div>
+          <div class="gauge-label">Meta: ${CONFIG.targetOKR}%</div>
+        </div>
+      </div>
+      <div style="margin-top:.5rem">
+        ${GROUPS.map(g=>{
+          const gs=groupStats(g.id);
+          const oc=barColor(gs.okr);
+          return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+            <span style="font-size:11px;color:var(--muted);width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${g.name}</span>
+            <div style="flex:1;height:5px;background:#eee;border-radius:3px">
+              <div style="width:${Math.min(gs.okr||0,100)}%;height:5px;border-radius:3px;background:${oc}"></div>
+            </div>
+            <span style="font-size:11px;font-weight:500;color:${oc};min-width:34px;text-align:right">${gs.okr!==null?gs.okr+'%':'—'}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Produção mensal — Planejado vs. Realizado (todos os grupos)</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#185FA5"></span>Planejado</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#9FE1CB"></span>Realizado</span>
+      </div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="chartMonthly" role="img" aria-label="Produção mensal agregada planejado vs realizado"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Atingimento acumulado por grupo</div>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="chartGroupOKR" role="img" aria-label="OKR acumulado por grupo"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status donut + cumulative -->
+  <div class="g2 row">
+    <div class="card">
+      <div class="card-title">Status dos projetos — distribuição</div>
+      <div class="chart-wrap" style="height:180px;max-width:280px;margin:0 auto;">
+        <canvas id="chartStatusDonut"></canvas>
+      </div>
+      <div style="display:flex;justify-content:center;gap:16px;margin-top:10px;flex-wrap:wrap;">
+        <span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#639922;"><span style="width:12px;height:12px;border-radius:50%;background:#639922;display:inline-block;"></span>No prazo</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#BA7517;"><span style="width:12px;height:12px;border-radius:50%;background:#BA7517;display:inline-block;"></span>Em risco</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#E24B4A;"><span style="width:12px;height:12px;border-radius:50%;background:#E24B4A;display:inline-block;"></span>Abaixo</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Produção acumulada — todos os grupos</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#185FA560;border:1px dashed #185FA5"></span>Meta acumulada</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#185FA5"></span>Realizado acumulado</span>
+      </div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="chartCumAll"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Charts row 2: All projects ranking -->
+  <div class="card row">
+    <div class="card-title">Ranking de atingimento — todos os projetos (Jan–${CONFIG.months[CONFIG.currentMonth]})</div>
+    <div class="legend" style="margin-bottom:.5rem">
+      <span class="legend-item"><span class="legend-dot" style="background:#639922"></span>≥ 95%</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#BA7517"></span>70–94%</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#E24B4A"></span>< 70%</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#7F77DD"></span>> 100%</span>
+    </div>
+    <div class="chart-wrap" style="height:${PROJECTS.length * 32 + 40}px">
+      <canvas id="chartRanking" role="img" aria-label="OKR por projeto ordenado"></canvas>
+    </div>
+  </div>
+
+  <!-- Summary table -->
+  <div class="card row">
+    <div class="card-title">Resumo de projetos — período Jan–${CONFIG.months[CONFIG.currentMonth]}</div>
+    <div class="ov-table-wrap">
+      <table class="tbl ov-table" id="ovTable"></table>
+    </div>
+  </div>`;
+
+  buildOverviewCharts(allAgg, totalOKR, nG, nA, nR);
+  buildOverviewTable();
+}
+
+function buildOverviewCharts(agg, totalOKR, nG, nA, nR){
+  // Gauge
+  const g = document.getElementById('chartGauge');
+  const okrColor = totalOKR>=CONFIG.targetOKR?'#639922':totalOKR>=70?'#BA7517':'#E24B4A';
+  CHARTS.gauge = new Chart(g,{
+    type:'doughnut',
+    data:{ datasets:[{
+      data:[Math.min(totalOKR,100), Math.max(0,100-Math.min(totalOKR,100))],
+      backgroundColor:[okrColor,'#e8e6de'], borderWidth:0
+    }]},
+    options:{ rotation:-90, circumference:180, cutout:'78%',
+      plugins:{legend:{display:false},tooltip:{enabled:false},datalabels:{display:false}},
+      animation:{duration:800} }
+  });
+
+  // Monthly grouped bar
+  const mc = document.getElementById('chartMonthly');
+  CHARTS.monthly = new Chart(mc,{
+    type:'bar',
+    data:{ labels:MONTHS_PERIOD,
+      datasets:[
+        { label:'Planejado', data:agg.plan.slice(0,M), backgroundColor:'#185FA540', borderColor:'#185FA5', borderWidth:1, borderRadius:3 },
+        { label:'Realizado', data:agg.real.slice(0,M), backgroundColor:'#0F6E56',  borderRadius:3 }
+      ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      layout:{padding:{top:24}},
+      plugins:{legend:{display:false},
+        datalabels:{
+          display:(ctx)=>ctx.datasetIndex===1&&ctx.dataset.data[ctx.dataIndex]>0,
+          anchor:'end',align:'end',font:{size:10,weight:'700'},
+          color:'#1a1917',formatter:v=>v
+        }},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10}}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}}
+      }}
+  });
+
+  // Group OKR horizontal bar
+  const gc = document.getElementById('chartGroupOKR');
+  const gLabels=[], gData=[], gColors=[];
+  GROUPS.forEach(g=>{
+    const gs=groupStats(g.id);
+    if(gs.okr===null) return;
+    gLabels.push(g.name.length>20?g.name.substring(0,18)+'…':g.name);
+    gData.push(gs.okr);
+    gColors.push(barColor(gs.okr));
+  });
+  CHARTS.groupOKR = new Chart(gc,{
+    type:'bar',
+    data:{ labels:gLabels,
+      datasets:[
+        { data:gData, backgroundColor:gColors, borderRadius:4, borderSkipped:false },
+        { data:Array(gLabels.length).fill(CONFIG.targetOKR), type:'line',
+          borderColor:'#1a1917', borderWidth:1.5, borderDash:[4,3],
+          pointRadius:0, fill:false, label:'Meta' }
+      ]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      layout:{padding:{right:44}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.datasetIndex===0?`OKR: ${ctx.raw}%`:null}},
+        datalabels:{
+          display:(ctx)=>ctx.datasetIndex===0,
+          anchor:'end',align:'right',font:{size:11,weight:'700'},
+          formatter:v=>v+'%',
+          color:(ctx)=>barColor(gData[ctx.dataIndex]),
+          clip:false
+        }},
+      scales:{
+        x:{min:0,max:120,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>v+'%'}},
+        y:{grid:{display:false},ticks:{font:{size:10}}}
+      }}
+  });
+
+  // Status distribution donut
+  const sd = document.getElementById('chartStatusDonut');
+  CHARTS.statusDonut = new Chart(sd,{
+    type:'doughnut',
+    data:{
+      labels:['No prazo / Superado','Em risco','Abaixo da meta'],
+      datasets:[{data:[nG,nA,nR],backgroundColor:['#639922','#BA7517','#E24B4A'],borderWidth:0,hoverOffset:6}]
+    },
+    options:{responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw} projeto(s)`}},
+        datalabels:{color:'#fff',font:{size:18,weight:'700'},formatter:(v)=>v>0?v:''}
+      }}
+  });
+
+  // Cumulative all groups
+  const ca = document.getElementById('chartCumAll');
+  const cumPlanAll = cumulative(agg.plan).slice(0,M);
+  const cumRealAll = cumulative(agg.real).slice(0,M);
+  CHARTS.cumAll = new Chart(ca,{
+    type:'line',
+    data:{labels:MONTHS_PERIOD,datasets:[
+      {label:'Meta',data:cumPlanAll,borderColor:'#185FA5',borderWidth:2,borderDash:[5,4],
+       backgroundColor:'#185FA510',fill:true,pointRadius:3,tension:.3},
+      {label:'Realizado',data:cumRealAll,borderColor:'#185FA5',borderWidth:2.5,
+       backgroundColor:'#185FA525',fill:true,pointRadius:4,tension:.3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      layout:{padding:{top:22,right:8}},
+      plugins:{legend:{display:false},
+        datalabels:{
+          display:(ctx)=>ctx.datasetIndex===1,
+          anchor:'top',align:'top',font:{size:10,weight:'700'},
+          color:'#185FA5',formatter:v=>v.toLocaleString('pt-BR'),
+          clip:false
+        }},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10}}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}}
+      }}
+  });
+
+  // All projects ranking
+  const rc = document.getElementById('chartRanking');
+  const projsSorted = [...PROJECTS]
+    .map(p=>({ name:p.name, okr:calcOKR(p.planned,p.realized), grp:p.group }))
+    .filter(p=>sumSlice(PROJECTS.find(x=>x.name===p.name).planned,M)>0)
+    .sort((a,b)=>(b.okr||0)-(a.okr||0));
+  const grpColorMap = {};
+  GROUPS.forEach(g=>grpColorMap[g.id]=g.color);
+  CHARTS.ranking = new Chart(rc,{
+    type:'bar',
+    data:{ labels:projsSorted.map(p=>p.name.length>30?p.name.substring(0,28)+'…':p.name),
+      datasets:[
+        { data:projsSorted.map(p=>Math.min(p.okr||0,130)),
+          backgroundColor:projsSorted.map(p=>barColor(p.okr)),
+          borderRadius:4, borderSkipped:false },
+        { data:Array(projsSorted.length).fill(CONFIG.targetOKR), type:'line',
+          borderColor:'#1a1917', borderWidth:1.5, borderDash:[4,3],
+          pointRadius:0, fill:false, label:'Meta' }
+      ]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.datasetIndex===0?`OKR: ${ctx.raw}%`:null}},
+        datalabels:{
+          display:(ctx)=>ctx.datasetIndex===0,
+          anchor:'end',align:'right',font:{size:10,weight:'700'},
+          formatter:v=>v+'%',
+          color:(ctx)=>barColor(projsSorted[ctx.dataIndex]?.okr),
+          clip:false
+        }},
+      layout:{padding:{right:44}},
+      scales:{
+        x:{min:0,max:115,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>v+'%'}},
+        y:{grid:{display:false},ticks:{font:{size:9}}}
+      }}
+  });
+}
+
+function buildOverviewTable(){
+  const tbl = document.getElementById('ovTable');
+  tbl.innerHTML=`<thead><tr>
+    <th class="l" style="min-width:160px">Grupo</th>
+    <th class="l" style="min-width:200px">Projeto</th>
+    <th>Plan. Período</th><th>Real. Período</th>
+    <th>OKR Período</th><th>Plan. Anual</th><th>Real. Anual</th>
+    <th>Progresso Anual</th><th>Status</th>
+  </tr></thead><tbody>`;
+  GROUPS.forEach(g=>{
+    const projs=groupProjects(g.id);
+    projs.forEach((p,i)=>{
+      const sp=sumSlice(p.planned,M), sr=sumSlice(p.realized,M);
+      const pct=calcOKR(p.planned,p.realized);
+      const annPlan=sumAll(p.planned), annReal=sumAll(p.realized);
+      const annPct=annPlan>0?+(annReal/annPlan*100).toFixed(1):null;
+      const bc=barColor(pct);
+      tbl.innerHTML+=`<tr>
+        <td class="l" style="color:${g.color};font-weight:500">${i===0?g.name:''}</td>
+        <td class="l">${p.name}${p.breakdown?`<span class="proj-note" style="background:${g.bg};color:${g.text}">Combinado</span>`:''}</td>
+        <td>${sp.toLocaleString('pt-BR')}</td>
+        <td>${sr.toLocaleString('pt-BR')}</td>
+        <td>${pillFor(pct)}</td>
+        <td>${annPlan.toLocaleString('pt-BR')}</td>
+        <td>${annReal.toLocaleString('pt-BR')}</td>
+        <td class="mini-bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:${annPlan>0?Math.min(annReal/annPlan*100,100):0}%;background:${bc}"></div></div></td>
+        <td>${pillFor(pct)}</td>
+      </tr>`;
+    });
+  });
+  tbl.innerHTML+='</tbody>';
+}
+
+// ── GROUP TAB ─────────────────────────────────────────────────────────────────
+function buildGroupTab(g){
+  const panel = document.createElement('div');
+  panel.id='panel-'+g.id; panel.className='tab-panel';
+  tabPanels.appendChild(panel);
+
+  const gs = groupStats(g.id);
+  const projs = groupProjects(g.id);
+  const agg = monthlyAgg(projs);
+  const okrColor = barColor(gs.okr);
+
+  panel.innerHTML=`
+  <!-- Group Hero -->
+  <div class="group-hero" style="background:${g.bg};border:0.5px solid ${g.color}30">
+    <div>
+      <div style="font-size:11px;font-weight:600;color:${g.text};text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">${g.name}</div>
+      <div style="font-size:22px;font-weight:500;color:${g.text}">OKR ${gs.okr!==null?gs.okr+'%':'—'}</div>
+      <div style="font-size:12px;color:${g.text}80;margin-top:2px">
+        ${gs.sr.toLocaleString('pt-BR')} de ${gs.sp.toLocaleString('pt-BR')} unidades entregues · Jan–${CONFIG.months[CONFIG.currentMonth]}
+      </div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+      <div class="card-sm" style="text-align:center">
+        <div style="font-size:20px;font-weight:500;color:#639922">${gs.nG}</div>
+        <div style="font-size:10px;color:var(--muted)">No prazo</div>
+      </div>
+      <div class="card-sm" style="text-align:center">
+        <div style="font-size:20px;font-weight:500;color:#BA7517">${gs.nA}</div>
+        <div style="font-size:10px;color:var(--muted)">Em risco</div>
+      </div>
+      <div class="card-sm" style="text-align:center">
+        <div style="font-size:20px;font-weight:500;color:#E24B4A">${gs.nR}</div>
+        <div style="font-size:10px;color:var(--muted)">Abaixo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts row -->
+  <div class="g2 row">
+    <div class="card">
+      <div class="card-title">Entregas mensais do grupo — Planejado vs. Realizado</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:${g.color}60"></span>Planejado</span>
+        <span class="legend-item"><span class="legend-dot" style="background:${g.color}"></span>Realizado</span>
+      </div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="chart-${g.id}-monthly" role="img" aria-label="Entregas mensais ${g.name}"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Progressão acumulada — Planejado vs. Realizado</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:${g.color}60;border:1px dashed ${g.color}"></span>Meta acumulada</span>
+        <span class="legend-item"><span class="legend-dot" style="background:${g.color}"></span>Realizado acumulado</span>
+      </div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="chart-${g.id}-cum" role="img" aria-label="Progressão acumulada ${g.name}"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2 row">
+    <div class="card">
+      <div class="card-title">OKR por projeto — período</div>
+      <div class="chart-wrap" style="height:${Math.max(150, projs.length*44+40)}px">
+        <canvas id="chart-${g.id}-okr" role="img" aria-label="OKR por projeto ${g.name}"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Desempenho mensal — Taxa de atingimento mês a mês (%)</div>
+      <div class="legend">
+        ${projs.filter((_,i)=>i<5).map((p,i)=>`<span class="legend-item"><span class="legend-dot" style="background:${projColor(g.color,i,projs.length)}"></span>${p.name.length>18?p.name.substring(0,16)+'…':p.name}</span>`).join('')}
+      </div>
+      <div class="chart-wrap" style="height:${Math.max(150, projs.length*44+40)}px">
+        <canvas id="chart-${g.id}-rate" role="img" aria-label="Taxa mensal ${g.name}"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Project accordion -->
+  <div class="card row">
+    <div class="card-title" style="margin-bottom:.75rem">Detalhe por projeto — OKR mensal e acumulado</div>
+    <div class="proj-list" id="projList-${g.id}"></div>
+  </div>`;
+
+  buildGroupCharts(g, projs, agg);
+  buildProjectCards(g, projs);
+  if(g.id==='ua') buildUAExtras(panel);
+}
+
+function projColor(base, i, total){
+  // Generate shade variations from base color
+  const shades=['#185FA5','#0F6E56','#3B6D11','#854F0B','#7A2D6A','#534AB7',
+                '#2B8FD4','#1D9E75','#639922','#BA7517','#993556','#7F77DD',
+                '#E24B4A','#F5A623','#50E3C2'];
+  return shades[i % shades.length];
+}
+
+function buildGroupCharts(g, projs, agg){
+  // Monthly bar
+  const mc = document.getElementById(`chart-${g.id}-monthly`);
+  CHARTS[`${g.id}-monthly`] = new Chart(mc,{
+    type:'bar',
+    data:{ labels:MONTHS_PERIOD,
+      datasets:[
+        { label:'Planejado', data:agg.plan.slice(0,M), backgroundColor:g.color+'40', borderColor:g.color, borderWidth:1, borderRadius:3 },
+        { label:'Realizado', data:agg.real.slice(0,M), backgroundColor:g.color, borderRadius:3 }
+      ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      layout:{padding:{top:24}},
+      plugins:{legend:{display:false},
+        datalabels:{
+          display:(ctx)=>ctx.datasetIndex===1&&ctx.dataset.data[ctx.dataIndex]>0,
+          anchor:'end',align:'end',font:{size:10,weight:'700'},
+          color:g.color,formatter:v=>v,clip:false
+        }},
+      scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}}} }
+  });
+
+  // Cumulative line
+  const cc = document.getElementById(`chart-${g.id}-cum`);
+  const cumPlan = cumulative(agg.plan).slice(0,M);
+  const cumReal = cumulative(agg.real).slice(0,M);
+  CHARTS[`${g.id}-cum`] = new Chart(cc,{
+    type:'line',
+    data:{ labels:MONTHS_PERIOD,
+      datasets:[
+        { label:'Meta acumulada', data:cumPlan, borderColor:g.color, borderWidth:2, borderDash:[5,4],
+          backgroundColor:g.color+'10', fill:true, pointRadius:3, tension:.3 },
+        { label:'Realizado acumulado', data:cumReal, borderColor:g.color, borderWidth:2.5,
+          backgroundColor:g.color+'25', fill:true, pointRadius:4, tension:.3 }
+      ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},datalabels:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}}} }
+  });
+
+  // OKR per project horizontal
+  const oc = document.getElementById(`chart-${g.id}-okr`);
+  const okrData = projs.map(p=>({ name:p.name, pct:calcOKR(p.planned,p.realized) }))
+                       .filter(d=>sumSlice(projs.find(x=>x.name===d.name).planned,M)>0);
+  CHARTS[`${g.id}-okr`] = new Chart(oc,{
+    type:'bar',
+    data:{ labels:okrData.map(d=>d.name.length>28?d.name.substring(0,26)+'…':d.name),
+      datasets:[
+        { data:okrData.map(d=>Math.min(d.pct||0,130)), backgroundColor:okrData.map(d=>barColor(d.pct)), borderRadius:4, borderSkipped:false },
+        { data:Array(okrData.length).fill(CONFIG.targetOKR), type:'line',
+          borderColor:'#1a1917', borderWidth:1.5, borderDash:[4,3], pointRadius:0, fill:false }
+      ]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      layout:{padding:{right:44}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.datasetIndex===0?`OKR: ${ctx.raw}%`:null}},
+        datalabels:{
+          display:(ctx)=>ctx.datasetIndex===0,
+          anchor:'end',align:'right',font:{size:11,weight:'700'},
+          formatter:v=>v+'%',
+          color:(ctx)=>barColor(okrData[ctx.dataIndex]?.pct),
+          clip:false
+        }},
+      scales:{x:{min:0,max:115,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>v+'%'}},y:{grid:{display:false},ticks:{font:{size:10}}}} }
+  });
+
+  // Monthly OKR rate line per project
+  const rc = document.getElementById(`chart-${g.id}-rate`);
+  const rateDatasets = projs.slice(0,6).map((p,i)=>{
+    const rates = Array.from({length:M},(_, mi)=>{
+      const pl=p.planned[mi]||0, re=p.realized[mi]||0;
+      if(pl===0&&re===0) return null;
+      if(pl===0) return null;
+      return +(re/pl*100).toFixed(1);
+    });
+    return { label:p.name, data:rates, borderColor:projColor(g.color,i,projs.length),
+             borderWidth:2, pointRadius:3, tension:.3, fill:false, spanGaps:true };
+  });
+  CHARTS[`${g.id}-rate`] = new Chart(rc,{
+    type:'line',
+    data:{ labels:MONTHS_PERIOD, datasets:rateDatasets },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw}%`}},datalabels:{display:false}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10}}},
+        y:{min:0,max:150,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>v+'%'},
+          afterDataLimits:scale=>scale.max=150 }
+      }}
+  });
+}
+
+function buildProjectCards(g, projs){
+  const list = document.getElementById(`projList-${g.id}`);
+  projs.forEach((p, pi)=>{
+    const pct = calcOKR(p.planned, p.realized);
+    const bc  = barColor(pct);
+    const barW= pct!==null ? Math.min(pct,100) : 0;
+    const pctLabel = pct===null?'—':pct>100?pct+'%':pct+'%';
+    const noteHtml = p.breakdown
+      ? `<span class="proj-note" style="background:${g.bg};color:${g.text}">Combinado</span>`:'';
+
+    // Build monthly table rows
+    let cumP=0, cumR=0;
+    let rows = '';
+    let hasNonZero = false;
+    for(let mi=0;mi<12;mi++){
+      const pl=p.planned[mi]||0, re=rz(p.realized[mi]);
+      cumP+=pl; cumR+=re;
+      const mOKR = mi<=CONFIG.currentMonth ? calcMonthOKR(pl,re) : null;
+      const aOKR = mi<=CONFIG.currentMonth && cumP>0 ? +(cumR/cumP*100).toFixed(1) : null;
+      const isNull = p.realized[mi]===null;
+      const isZero = pl===0&&re===0;
+      if(!isZero) hasNonZero=true;
+      const rowClass = isNull?'style="opacity:.35"':isZero?'class="zero"':'';
+      const mPill = isNull?`<span style="font-size:10px;color:var(--hint)">—</span>`:pillFor(mOKR);
+      const aPillVal = aOKR!==null?`<b style="color:${barColor(aOKR)}">${aOKR}%</b>`:
+                       isNull?`<span style="color:var(--hint)">—</span>`:'—';
+      const aBar = aOKR!==null?`<div class="mini-bar"><div class="mini-bar-fill" style="width:${Math.min(aOKR,100)}%;background:${barColor(aOKR)}"></div></div>`:'';
+      rows+=`<tr ${rowClass}>
+        <td class="l">${CONFIG.months[mi]}</td>
+        <td>${pl===0?'—':pl.toLocaleString('pt-BR')}</td>
+        <td>${isNull?'<i style="color:var(--hint)">pendente</i>':re===0&&pl===0?'—':re.toLocaleString('pt-BR')}</td>
+        <td>${mPill}</td>
+        <td>${aPillVal}</td>
+        <td class="mini-bar-cell">${aBar}</td>
+      </tr>`;
+    }
+    // Period total
+    const sp=sumSlice(p.planned,M), sr=sumSlice(p.realized,M);
+    const periodPct=calcOKR(p.planned,p.realized);
+    rows+=`<tr class="total">
+      <td class="l">Jan–${CONFIG.months[CONFIG.currentMonth]}</td>
+      <td>${sp.toLocaleString('pt-BR')}</td><td>${sr.toLocaleString('pt-BR')}</td>
+      <td>—</td>
+      <td><b style="color:${barColor(periodPct)}">${periodPct!==null?periodPct+'%':'—'}</b></td>
+      <td class="mini-bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:${Math.min(periodPct||0,100)}%;background:${barColor(periodPct)}"></div></div></td>
+    </tr>`;
+
+    // Annual total
+    const annP=sumAll(p.planned), annR=sumAll(p.realized);
+    const annPct=annP>0?+(annR/annP*100).toFixed(1):null;
+    rows+=`<tr class="total">
+      <td class="l">Ano (Jan–Dez)</td>
+      <td>${annP.toLocaleString('pt-BR')}</td><td>${annR.toLocaleString('pt-BR')}</td>
+      <td>—</td>
+      <td><b style="color:${barColor(annPct)}">${annPct!==null?annPct+'%':'—'}</b></td>
+      <td class="mini-bar-cell"><div class="mini-bar"><div class="mini-bar-fill" style="width:${Math.min(annPct||0,100)}%;background:${barColor(annPct)}"></div></div></td>
+    </tr>`;
+
+    // Breakdown box
+    let breakdownHtml = '';
+    if(p.breakdown){
+      breakdownHtml=`<div class="breakdown">
+        <div style="font-size:10px;font-weight:600;color:var(--hint);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">Composição do realizado</div>
+        ${p.breakdown.map(b=>{
+          const br=sumSlice(b.realized,M);
+          return `<div class="breakdown-row"><span>${b.label}</span><span><b>${br.toLocaleString('pt-BR')}</b> un.</span></div>`;
+        }).join('')}
+      </div>`;
+    }
+
+    const itemId = `${g.id}-proj-${pi}`;
+    list.innerHTML+=`
+    <div class="proj-item">
+      <div class="proj-hdr" onclick="toggleProj('${itemId}')">
+        <span class="proj-hdr-name">${p.name}${noteHtml}</span>
+        <div class="proj-hdr-bar" style="background:var(--bg)">
+          <div class="proj-hdr-bar-fill" style="width:${barW}%;background:${bc}"></div>
+          <div class="proj-hdr-target" style="left:${CONFIG.targetOKR}%;background:#ccc"></div>
+        </div>
+        <span class="proj-hdr-pct" style="color:${bc}">${pctLabel}</span>
+        ${pillFor(pct)}
+        <span class="proj-chevron" id="chev-${itemId}">▾</span>
+      </div>
+      <div class="proj-body" id="body-${itemId}">
+        <div class="g2" style="gap:10px;margin-bottom:.75rem">
+          <div>
+            <div style="font-size:10px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Progressão mensal</div>
+            <div style="height:110px;position:relative">
+              <canvas id="mini-${itemId}" role="img" aria-label="Progressão ${p.name}"></canvas>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">OKR acumulado</div>
+            <div style="height:110px;position:relative">
+              <canvas id="miniokr-${itemId}" role="img" aria-label="OKR acumulado ${p.name}"></canvas>
+            </div>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl" style="min-width:500px">
+            <thead><tr>
+              <th class="l">Mês</th>
+              <th>Planejado</th><th>Realizado</th>
+              <th>OKR Mensal</th><th>OKR Acumulado</th>
+              <th>Progresso</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        ${breakdownHtml}
+      </div>
+    </div>`;
+
+    // Open first project by default
+    if(pi===0){
+      setTimeout(()=>toggleProj(itemId, true),100);
+    }
+  });
+}
+
+function toggleProj(id, forceOpen=false){
+  const body=document.getElementById(`body-${id}`);
+  const chev=document.getElementById(`chev-${id}`);
+  const willOpen = forceOpen || !body.classList.contains('open');
+  body.classList.toggle('open', willOpen);
+  chev.classList.toggle('open', willOpen);
+  if(willOpen) setTimeout(()=>buildMiniCharts(id), 50);
+}
+
+const builtMinis = new Set();
+function buildMiniCharts(id){
+  if(builtMinis.has(id)) return;
+  builtMinis.add(id);
+  // Find the project
+  const [gid,,, piStr] = id.split('-');
+  const pi = parseInt(piStr);
+  const grp = GROUPS.find(g=>g.id===gid);
+  if(!grp) return;
+  const projs = groupProjects(gid);
+  const p = projs[pi];
+  if(!p) return;
+
+  // Mini bar chart: planned vs realized per month
+  const mc = document.getElementById(`mini-${id}`);
+  if(mc){
+    CHARTS[`mini-${id}`]=new Chart(mc,{
+      type:'bar',
+      data:{ labels:MONTHS_PERIOD,
+        datasets:[
+          { label:'Planejado', data:p.planned.slice(0,M), backgroundColor:grp.color+'40', borderColor:grp.color, borderWidth:1, borderRadius:2 },
+          { label:'Realizado', data:p.realized.slice(0,M).map(v=>rz(v)), backgroundColor:grp.color, borderRadius:2 }
+        ]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9}}}} }
+    });
+  }
+
+  // Mini OKR accumulation line
+  const oc = document.getElementById(`miniokr-${id}`);
+  if(oc){
+    let cumP=0,cumR=0;
+    const okrLine=[];
+    for(let mi=0;mi<M;mi++){
+      cumP+=p.planned[mi]||0;
+      cumR+=rz(p.realized[mi]);
+      okrLine.push(cumP>0?+(cumR/cumP*100).toFixed(1):null);
+    }
+    CHARTS[`miniokr-${id}`]=new Chart(oc,{
+      type:'line',
+      data:{ labels:MONTHS_PERIOD,
+        datasets:[
+          { label:'OKR acumulado', data:okrLine, borderColor:grp.color, borderWidth:2,
+            backgroundColor:grp.color+'20', fill:true, pointRadius:3, tension:.3 },
+          { label:'Meta', data:Array(M).fill(CONFIG.targetOKR), borderColor:'#ccc',
+            borderWidth:1, borderDash:[4,3], pointRadius:0, fill:false }
+        ]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{
+          x:{grid:{display:false},ticks:{font:{size:9}}},
+          y:{min:0,max:130,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},callback:v=>v+'%'}}
+        }}
+    });
+  }
+}
+
+// ── UA EXTRAS: CAPACIDADE + ORÇAMENTO ────────────────────────────────────────
+function buildUAExtras(panel){
+  const hp = 200; // h/mês por pessoa alocada
+  const uaUnitVal = 2562;
+  const mcUnitVal = 870;
+  const months12 = CONFIG.months;
+
+  const uaProj = PROJECTS.find(p=>p.name.includes('Unidades de Aprendizagem'));
+  const mcProj = PROJECTS.find(p=>p.name.includes('Melhoria Contínua'));
+
+  // ── Capacity ──────────────────────────────────────────────────────────
+  const diHoursUA = uaProj.planned.map(u=>+(u*22.6).toFixed(1));
+  const diHoursMC = mcProj.planned.map(u=>+(u*8.0).toFixed(1));
+  const cqHoursUA = uaProj.planned.map(u=>+(u*3.10).toFixed(1));
+  const cqHoursMC = mcProj.planned.map(u=>+(u*4.75).toFixed(1));
+  const diTotal   = months12.map((_,i)=>+(diHoursUA[i]+diHoursMC[i]).toFixed(1));
+  const cqTotal   = months12.map((_,i)=>+(cqHoursUA[i]+cqHoursMC[i]).toFixed(1));
+  const diPeople  = diTotal.map(h=>+(h/hp).toFixed(2));
+  const cqPeople  = cqTotal.map(h=>+(h/hp).toFixed(2));
+  const peakDI    = Math.max(...diTotal);
+  const peakCQ    = Math.max(...cqTotal);
+  const maxDIppl  = Math.max(...diPeople);
+  const maxCQppl  = Math.max(...cqPeople);
+  const annDI     = Math.round(diTotal.reduce((s,v)=>s+v,0));
+  const annCQ     = Math.round(cqTotal.reduce((s,v)=>s+v,0));
+
+  // ── Budget ────────────────────────────────────────────────────────────
+  const uaPlanTotal   = uaProj.planned.reduce((s,v)=>s+v,0);
+  const mcPlanTotal   = mcProj.planned.reduce((s,v)=>s+v,0);
+  const uaBudgM       = uaProj.planned.map(u=>u*uaUnitVal);
+  const mcBudgM       = mcProj.planned.map(u=>u*mcUnitVal);
+  const uaRealM       = uaProj.realized.map(v=>v!==null?v*uaUnitVal:null);
+  const mcRealM       = mcProj.realized.map(v=>v!==null?v*mcUnitVal:null);
+  const uaBudgTotal   = uaPlanTotal*uaUnitVal;
+  const mcBudgTotal   = mcPlanTotal*mcUnitVal;
+  const totalBudget   = uaBudgTotal+mcBudgTotal;
+  const uaRealized$   = uaProj.realized.slice(0,M).reduce((s,v)=>s+(v||0),0)*uaUnitVal;
+  const mcRealized$   = mcProj.realized.slice(0,M).reduce((s,v)=>s+(v||0),0)*mcUnitVal;
+  const totalReal$    = uaRealized$+mcRealized$;
+  const saldo         = totalBudget-totalReal$;
+  const execPct       = +(totalReal$/totalBudget*100).toFixed(1);
+
+  const fmtR = v=>'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+  const fmt1 = v=>v.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
+  const fmt2 = v=>v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  const extra = document.createElement('div');
+  extra.innerHTML=`
+  <!-- ── DIVIDER: CAPACIDADE ── -->
+  <div style="display:flex;align-items:center;gap:10px;margin:32px 0 16px;">
+    <div style="flex:1;height:1px;background:#d3d1c7;"></div>
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#888780;padding:0 4px;">Capacidade Produtiva</div>
+    <div style="flex:1;height:1px;background:#d3d1c7;"></div>
+  </div>
+  <p style="font-size:12px;color:#888780;margin-bottom:14px;">Demanda de horas DI e CQ geradas pelas entregas planejadas de UA novas e MC de UAs. Base: ${hp}h/mês = 1 pessoa alocada.</p>
+
+  <!-- Capacity KPIs -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+    <div style="background:#EDE9FE;border-radius:10px;padding:14px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#6D28D9;margin-bottom:4px;">Pico DI / mês</div>
+      <div style="font-size:22px;font-weight:700;color:#5B21B6;">${fmt1(peakDI)}h</div>
+      <div style="font-size:11px;color:#7C3AED;">≈ ${fmt2(maxDIppl)} pessoas</div>
+    </div>
+    <div style="background:#D1FAE5;border-radius:10px;padding:14px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#065F46;margin-bottom:4px;">Pico CQ / mês</div>
+      <div style="font-size:22px;font-weight:700;color:#065F46;">${fmt1(peakCQ)}h</div>
+      <div style="font-size:11px;color:#059669;">≈ ${fmt2(maxCQppl)} pessoas</div>
+    </div>
+    <div style="background:#F5F3FF;border-radius:10px;padding:14px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#5B21B6;margin-bottom:4px;">Total DI/ano</div>
+      <div style="font-size:22px;font-weight:700;color:#1a1917;">${annDI.toLocaleString('pt-BR')}h</div>
+      <div style="font-size:11px;color:#888780;">Design Instrucional</div>
+    </div>
+    <div style="background:#ECFDF5;border-radius:10px;padding:14px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#065F46;margin-bottom:4px;">Total CQ/ano</div>
+      <div style="font-size:22px;font-weight:700;color:#1a1917;">${annCQ.toLocaleString('pt-BR')}h</div>
+      <div style="font-size:11px;color:#888780;">Controle de Qualidade</div>
+    </div>
+  </div>
+
+  <!-- Capacity charts row -->
+  <div class="g2 row">
+    <div class="card">
+      <div class="card-title">Horas DI mensais — UA novas + MC de UA</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#3B6D11"></span>UA novas</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#854F0B"></span>MC de UA</span>
+      </div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="capDI-ua"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Horas CQ mensais — UA novas + MC de UA</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#3B6D11"></span>UA novas</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#854F0B"></span>MC de UA</span>
+      </div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="capCQ-ua"></canvas></div>
+    </div>
+  </div>
+  <div class="card row">
+    <div class="card-title">Headcount necessário por mês (÷ ${hp}h)</div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background:#5B21B6"></span>DI — Design Instrucional</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#059669"></span>CQ — Controle de Qualidade</span>
+    </div>
+    <div class="chart-wrap" style="height:180px;"><canvas id="capPpl-ua"></canvas></div>
+  </div>
+
+  <!-- Capacity table -->
+  <div class="card row">
+    <div class="card-title" style="margin-bottom:.75rem;">Detalhamento de capacidade — Jan a Dez</div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#EDE9FE;border-bottom:1px solid #c4b5fd;">
+            <th style="text-align:left;padding:7px 10px;font-weight:600;color:#5B21B6;">Mês</th>
+            <th style="text-align:right;padding:7px 10px;font-weight:500;color:#3B6D11;">UA (un.)</th>
+            <th style="text-align:right;padding:7px 10px;font-weight:500;color:#854F0B;">MC (un.)</th>
+            <th style="text-align:right;padding:7px 10px;font-weight:600;color:#5B21B6;">Horas DI</th>
+            <th style="text-align:right;padding:7px 10px;font-weight:600;color:#065F46;">Horas CQ</th>
+            <th style="text-align:right;padding:7px 10px;font-weight:600;color:#5B21B6;">Pess. DI</th>
+            <th style="text-align:right;padding:7px 10px;font-weight:600;color:#065F46;">Pess. CQ</th>
+          </tr>
+        </thead>
+        <tbody id="capTbl-ua"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── DIVIDER: ORÇAMENTO ── -->
+  <div style="display:flex;align-items:center;gap:10px;margin:32px 0 16px;">
+    <div style="flex:1;height:1px;background:#d3d1c7;"></div>
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#888780;padding:0 4px;">Orçamento</div>
+    <div style="flex:1;height:1px;background:#d3d1c7;"></div>
+  </div>
+  <p style="font-size:12px;color:#888780;margin-bottom:14px;">UA novas: ${fmtR(uaUnitVal)}/un. &nbsp;·&nbsp; MC de UA: ${fmtR(mcUnitVal)}/un. &nbsp;·&nbsp; Execução Jan–${CONFIG.months[CONFIG.currentMonth]} vs. orçamento Jan–Dez.</p>
+
+  <!-- Budget KPIs -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+    <div style="background:#F0FDF4;border-radius:10px;padding:14px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#166534;margin-bottom:4px;">Orçamento Total</div>
+      <div style="font-size:20px;font-weight:700;color:#166534;">${fmtR(totalBudget)}</div>
+      <div style="font-size:11px;color:#888780;">Jan–Dez 2026</div>
+    </div>
+    <div style="background:#EFF6FF;border-radius:10px;padding:14px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#1E40AF;margin-bottom:4px;">Realizado Jan–${CONFIG.months[CONFIG.currentMonth]}</div>
+      <div style="font-size:20px;font-weight:700;color:#1E40AF;">${fmtR(totalReal$)}</div>
+      <div style="font-size:11px;color:#888780;">${execPct}% executado</div>
+    </div>
+    <div style="background:#FFFBEB;border-radius:10px;padding:14px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#92400E;margin-bottom:4px;">Saldo Disponível</div>
+      <div style="font-size:20px;font-weight:700;color:#92400E;">${fmtR(saldo)}</div>
+      <div style="font-size:11px;color:#888780;">${(100-execPct).toFixed(1)}% restante</div>
+    </div>
+    <div style="background:#F8FAFC;border-radius:10px;padding:14px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#475569;margin-bottom:6px;">Valor unitário</div>
+      <div style="font-size:13px;font-weight:600;color:#3B6D11;">UA: ${fmtR(uaUnitVal)}</div>
+      <div style="font-size:13px;font-weight:600;color:#854F0B;margin-top:2px;">MC: ${fmtR(mcUnitVal)}</div>
+    </div>
+  </div>
+
+  <!-- UA Budget + Capacity donuts -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+    <div class="card" style="text-align:center;">
+      <div class="card-title">Execução orçamentária</div>
+      <div class="chart-wrap" style="height:170px;"><canvas id="budgExecDonut-ua"></canvas></div>
+      <div style="font-size:11px;color:#888780;margin-top:6px;">Realizado vs. Saldo</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="card-title">Distribuição do orçamento</div>
+      <div class="chart-wrap" style="height:170px;"><canvas id="budgSplitDonut-ua"></canvas></div>
+      <div style="font-size:11px;color:#888780;margin-top:6px;">UA novas vs. MC de UA</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="card-title">Horas anuais DI vs. CQ</div>
+      <div class="chart-wrap" style="height:170px;"><canvas id="capSplitDonut-ua"></canvas></div>
+      <div style="font-size:11px;color:#888780;margin-top:6px;">Design Instrucional vs. CQ</div>
+    </div>
+  </div>
+
+  <!-- Budget charts -->
+  <div class="g2 row">
+    <div class="card">
+      <div class="card-title">UA novas — Orçamento vs. Realizado (${fmtR(uaUnitVal)}/un.)</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#3B6D1160;border:1px solid #3B6D11"></span>Orçamento</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#3B6D11"></span>Realizado</span>
+      </div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="budgUA-ua"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">MC de UA — Orçamento vs. Realizado (${fmtR(mcUnitVal)}/un.)</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#854F0B60;border:1px solid #854F0B"></span>Orçamento</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#854F0B"></span>Realizado</span>
+      </div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="budgMC-ua"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Budget table -->
+  <div class="card row">
+    <div class="card-title" style="margin-bottom:.75rem;">Resumo financeiro mensal — Jan a Dez</div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#F0FDF4;border-bottom:1px solid #86EFAC;">
+            <th style="text-align:left;padding:7px 10px;font-weight:600;color:#166534;">Mês</th>
+            <th style="text-align:right;padding:7px 10px;font-weight:500;color:#3B6D11;">UA (un.)</th>
+            <th style="text-align:right;padding:7px 10px;font-weight:500;color:#854F0B;">MC (un.)</th>
+            <th style="text-align:right;padding:7px 10px;color:#166534;">Orç. UA</th>
+            <th style="text-align:right;padding:7px 10px;color:#166534;">Orç. MC</th>
+            <th style="text-align:right;padding:7px 10px;color:#1E40AF;">Real. UA</th>
+            <th style="text-align:right;padding:7px 10px;color:#1E40AF;">Real. MC</th>
+            <th style="text-align:right;padding:7px 10px;font-weight:700;color:#1a1917;">Total Mês</th>
+          </tr>
+        </thead>
+        <tbody id="budgTbl-ua"></tbody>
+        <tfoot>
+          <tr style="background:#F0FDF4;border-top:2px solid #86EFAC;font-weight:700;">
+            <td style="padding:7px 10px;">TOTAL</td>
+            <td style="text-align:right;padding:7px 10px;">${uaPlanTotal}</td>
+            <td style="text-align:right;padding:7px 10px;">${mcPlanTotal}</td>
+            <td style="text-align:right;padding:7px 10px;color:#166534;">${fmtR(uaBudgTotal)}</td>
+            <td style="text-align:right;padding:7px 10px;color:#166534;">${fmtR(mcBudgTotal)}</td>
+            <td style="text-align:right;padding:7px 10px;color:#1E40AF;">${fmtR(uaRealized$)}</td>
+            <td style="text-align:right;padding:7px 10px;color:#1E40AF;">${fmtR(mcRealized$)}</td>
+            <td style="text-align:right;padding:7px 10px;color:#166534;">${fmtR(totalBudget)}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>`;
+
+  panel.appendChild(extra);
+
+  // ── Populate capacity table ────────────────────────────────────────────
+  const capTbody = panel.querySelector('#capTbl-ua');
+  months12.forEach((m,i)=>{
+    const tr = document.createElement('tr');
+    tr.style.background = i%2===0 ? '#fafaf9' : '#fff';
+    tr.innerHTML=`
+      <td style="padding:6px 10px;font-weight:500;">${m}</td>
+      <td style="text-align:right;padding:6px 10px;">${uaProj.planned[i]}</td>
+      <td style="text-align:right;padding:6px 10px;">${mcProj.planned[i]}</td>
+      <td style="text-align:right;padding:6px 10px;font-weight:500;color:#5B21B6;">${fmt1(diTotal[i])}</td>
+      <td style="text-align:right;padding:6px 10px;font-weight:500;color:#065F46;">${fmt1(cqTotal[i])}</td>
+      <td style="text-align:right;padding:6px 10px;color:#7C3AED;">${fmt2(diPeople[i])}</td>
+      <td style="text-align:right;padding:6px 10px;color:#059669;">${fmt2(cqPeople[i])}</td>`;
+    capTbody.appendChild(tr);
+  });
+
+  // ── Populate budget table ──────────────────────────────────────────────
+  const budgTbody = panel.querySelector('#budgTbl-ua');
+  months12.forEach((m,i)=>{
+    const isReal = i<=CONFIG.currentMonth;
+    const ruaV   = uaRealM[i];
+    const rmcV   = mcRealM[i];
+    const totalM = (ruaV!==null?ruaV:0)+(rmcV!==null?rmcV:0);
+    const tr = document.createElement('tr');
+    tr.style.background = i%2===0 ? '#fafaf9' : '#fff';
+    if(!isReal) tr.style.opacity='.5';
+    tr.innerHTML=`
+      <td style="padding:6px 10px;font-weight:${isReal?600:400};">${m}</td>
+      <td style="text-align:right;padding:6px 10px;">${uaProj.planned[i]}</td>
+      <td style="text-align:right;padding:6px 10px;">${mcProj.planned[i]}</td>
+      <td style="text-align:right;padding:6px 10px;color:#3B6D11;">${fmtR(uaBudgM[i])}</td>
+      <td style="text-align:right;padding:6px 10px;color:#854F0B;">${fmtR(mcBudgM[i])}</td>
+      <td style="text-align:right;padding:6px 10px;color:#1E40AF;">${ruaV!==null?fmtR(ruaV):'—'}</td>
+      <td style="text-align:right;padding:6px 10px;color:#1E40AF;">${rmcV!==null?fmtR(rmcV):'—'}</td>
+      <td style="text-align:right;padding:6px 10px;font-weight:600;">${isReal?fmtR(totalM):'—'}</td>`;
+    budgTbody.appendChild(tr);
+  });
+
+  // ── Render charts ─────────────────────────────────────────────────────
+  setTimeout(()=>{
+    const stackOpts = unit=>({
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        datalabels:{
+          display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0,
+          anchor:'center',align:'center',font:{size:9,weight:'700'},
+          color:'#fff',formatter:v=>v>0?v+unit:''
+        }
+      },
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},
+        y:{stacked:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>v+unit}}
+      }
+    });
+
+    new Chart(document.getElementById('capDI-ua'),{type:'bar',data:{labels:months12,datasets:[
+      {label:'UA novas',data:diHoursUA,backgroundColor:'#3B6D11',borderRadius:2},
+      {label:'MC de UA',data:diHoursMC,backgroundColor:'#854F0B',borderRadius:2},
+    ]},options:stackOpts('h')});
+
+    new Chart(document.getElementById('capCQ-ua'),{type:'bar',data:{labels:months12,datasets:[
+      {label:'UA novas',data:cqHoursUA,backgroundColor:'#3B6D11',borderRadius:2},
+      {label:'MC de UA',data:cqHoursMC,backgroundColor:'#854F0B',borderRadius:2},
+    ]},options:stackOpts('h')});
+
+    new Chart(document.getElementById('capPpl-ua'),{type:'line',data:{labels:months12,datasets:[
+      {label:'DI pessoas',data:diPeople,borderColor:'#5B21B6',backgroundColor:'#5B21B620',
+       borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#5B21B6',fill:true,tension:.3},
+      {label:'CQ pessoas',data:cqPeople,borderColor:'#059669',backgroundColor:'#05966920',
+       borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#059669',fill:true,tension:.3},
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      layout:{padding:{top:22}},
+      plugins:{legend:{display:false},
+        datalabels:{
+          display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0,
+          anchor:'top',align:'top',font:{size:9,weight:'700'},
+          color:(ctx)=>ctx.datasetIndex===0?'#5B21B6':'#059669',
+          formatter:v=>v.toFixed(1),clip:false
+        }},
+      scales:{x:{grid:{display:false},ticks:{font:{size:10}}},
+              y:{min:0,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>v+' pess.'}}}}});
+
+    const moneyOpts = color=>({responsive:true,maintainAspectRatio:false,
+      layout:{padding:{top:24}},
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>fmtR(ctx.parsed.y)}},
+        datalabels:{
+          display:(ctx)=>ctx.datasetIndex===1&&ctx.dataset.data[ctx.dataIndex]>0,
+          anchor:'end',align:'end',font:{size:9,weight:'700'},
+          color:color,formatter:v=>'R$'+(v/1000).toFixed(0)+'k',clip:false
+        }
+      },
+      scales:{x:{grid:{display:false},ticks:{font:{size:10}}},
+              y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}});
+
+    new Chart(document.getElementById('budgUA-ua'),{type:'bar',data:{labels:months12,datasets:[
+      {label:'Orçamento',data:uaBudgM,backgroundColor:'#3B6D1125',borderColor:'#3B6D11',borderWidth:1,borderRadius:2},
+      {label:'Realizado',data:uaRealM.map(v=>v!==null?v:0),backgroundColor:'#3B6D11',borderRadius:2},
+    ]},options:moneyOpts('#3B6D11')});
+
+    new Chart(document.getElementById('budgMC-ua'),{type:'bar',data:{labels:months12,datasets:[
+      {label:'Orçamento',data:mcBudgM,backgroundColor:'#854F0B25',borderColor:'#854F0B',borderWidth:1,borderRadius:2},
+      {label:'Realizado',data:mcRealM.map(v=>v!==null?v:0),backgroundColor:'#854F0B',borderRadius:2},
+    ]},options:moneyOpts('#854F0B')});
+
+    // Donut charts
+    const donutOpts = (fmtFn) => ({
+      responsive:true, maintainAspectRatio:false,
+      cutout:'60%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fmtFn(ctx.raw)}`}},
+        datalabels:{
+          color:'#fff',font:{size:13,weight:'700'},
+          formatter:(v,ctx)=>{
+            const total=ctx.dataset.data.reduce((s,d)=>s+d,0);
+            const pct=(v/total*100).toFixed(0);
+            return pct>8?pct+'%':'';
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('budgExecDonut-ua'),{
+      type:'doughnut',
+      data:{labels:['Realizado','Saldo'],
+        datasets:[{data:[totalReal$,Math.max(0,saldo)],backgroundColor:['#1E40AF','#e8e6de'],borderWidth:0,hoverOffset:6}]},
+      options:donutOpts(fmtR)
+    });
+
+    new Chart(document.getElementById('budgSplitDonut-ua'),{
+      type:'doughnut',
+      data:{labels:['UA novas','MC de UA'],
+        datasets:[{data:[uaBudgTotal,mcBudgTotal],backgroundColor:['#3B6D11','#854F0B'],borderWidth:0,hoverOffset:6}]},
+      options:donutOpts(fmtR)
+    });
+
+    new Chart(document.getElementById('capSplitDonut-ua'),{
+      type:'doughnut',
+      data:{labels:['DI – Design Instrucional','CQ – Controle de Qualidade'],
+        datasets:[{data:[annDI,annCQ],backgroundColor:['#5B21B6','#059669'],borderWidth:0,hoverOffset:6}]},
+      options:donutOpts(v=>v.toLocaleString('pt-BR')+'h')
+    });
+  }, 80);
+}
+
+// ── CAPACIDADE PRODUTIVA ──────────────────────────────────────────────────────
+function buildCapacidadeTab(){
+  const panel = document.createElement('div');
+  panel.id = 'panel-capacidade';
+  panel.className = 'tab-panel';
+  tabPanels.appendChild(panel);
+
+  // Pre-compute monthly demand arrays
+  const months12 = CONFIG.months;
+  const hp = CAP.hoursPerPerson;
+
+  // Per-project DI and CQ hours per month
+  const diByProj = CAP.projects.map(p => p.planned.map(u => +(u * p.hours.DI).toFixed(1)));
+  const cqByProj = CAP.projects.map(p => p.planned.map(u => +(u * p.hours.CQ).toFixed(1)));
+
+  // Totals per month
+  const diTotal = months12.map((_,i) => +(diByProj.reduce((s,a)=>s+a[i],0)).toFixed(1));
+  const cqTotal = months12.map((_,i) => +(cqByProj.reduce((s,a)=>s+a[i],0)).toFixed(1));
+  const diPeople = diTotal.map(h => +(h/hp).toFixed(2));
+  const cqPeople = cqTotal.map(h => +(h/hp).toFixed(2));
+
+  const peakDI = Math.max(...diTotal);
+  const peakCQ = Math.max(...cqTotal);
+  const maxDIppl = Math.max(...diPeople);
+  const maxCQppl = Math.max(...cqPeople);
+  const annualDI = diTotal.reduce((s,v)=>s+v,0);
+  const annualCQ = cqTotal.reduce((s,v)=>s+v,0);
+
+  const fmt1 = v => v.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
+  const fmt2 = v => v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  panel.innerHTML = `
+  <div style="margin-bottom:24px;">
+    <h2 style="font-size:18px;font-weight:600;color:#1a1917;margin-bottom:4px;">Capacidade Produtiva Demandada</h2>
+    <p style="font-size:13px;color:#888780;">DI e CQ · UA e MC de UA · Projeção 12 meses · Base: ${hp}h/mês por pessoa alocada</p>
+  </div>
+
+  <!-- KPI row -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
+    <div style="background:#EDE9FE;border-radius:10px;padding:14px 16px;">
+      <div style="font-size:11px;color:#6D28D9;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Pico DI (horas/mês)</div>
+      <div style="font-size:24px;font-weight:600;color:#5B21B6;">${fmt1(peakDI)}h</div>
+      <div style="font-size:12px;color:#7C3AED;margin-top:2px;">≈ ${fmt2(maxDIppl)} pessoas</div>
+    </div>
+    <div style="background:#D1FAE5;border-radius:10px;padding:14px 16px;">
+      <div style="font-size:11px;color:#065F46;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Pico CQ (horas/mês)</div>
+      <div style="font-size:24px;font-weight:600;color:#065F46;">${fmt1(peakCQ)}h</div>
+      <div style="font-size:12px;color:#059669;margin-top:2px;">≈ ${fmt2(maxCQppl)} pessoas</div>
+    </div>
+    <div style="background:#F5F3FF;border-radius:10px;padding:14px 16px;">
+      <div style="font-size:11px;color:#6D28D9;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Total anual de horas</div>
+      <div style="font-size:22px;font-weight:600;color:#1a1917;">${Math.round(annualDI+annualCQ).toLocaleString('pt-BR')}h</div>
+      <div style="font-size:12px;color:#888780;margin-top:2px;">DI: ${Math.round(annualDI).toLocaleString('pt-BR')}h · CQ: ${Math.round(annualCQ).toLocaleString('pt-BR')}h</div>
+    </div>
+  </div>
+
+  <!-- Charts row 1: DI hours + CQ hours stacked bars -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+    <div style="background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:16px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:#5B21B6;">Horas DI por mês</div>
+      <div style="font-size:11px;color:#888780;margin-bottom:12px;">Design Instrucional · horas demandadas por projeto</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:#555;">
+        ${CAP.projects.map(p=>`<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:${p.color};display:inline-block;"></span>${p.name.replace(' – UAs','')}</span>`).join('')}
+      </div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="capDIchart"></canvas></div>
+    </div>
+    <div style="background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:16px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:#065F46;">Horas CQ por mês</div>
+      <div style="font-size:11px;color:#888780;margin-bottom:12px;">Controle de Qualidade · horas demandadas por projeto</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:#555;">
+        ${CAP.projects.map(p=>`<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:${p.color};display:inline-block;"></span>${p.name.replace(' – UAs','')}</span>`).join('')}
+      </div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="capCQchart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Chart row 2: People needed line chart -->
+  <div style="background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;padding:16px;margin-bottom:24px;">
+    <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:#1a1917;">Pessoas necessárias por mês</div>
+    <div style="font-size:11px;color:#888780;margin-bottom:12px;">Baseado em ${hp}h/mês por pessoa alocada — projeção de headcount mínimo</div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:#555;">
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:20px;height:3px;background:#5B21B6;border-radius:2px;display:inline-block;"></span>DI (Design Instrucional)</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:20px;height:3px;background:#059669;border-radius:2px;display:inline-block;"></span>CQ (Controle de Qualidade)</span>
+    </div>
+    <div class="chart-wrap" style="height:240px;"><canvas id="capPplChart"></canvas></div>
+  </div>
+
+  <!-- Table -->
+  <div style="background:#fff;border:0.5px solid #d3d1c7;border-radius:12px;overflow:hidden;">
+    <div style="padding:16px 16px 8px;font-size:13px;font-weight:600;color:#1a1917;">Detalhamento Mensal</div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#F5F3FF;border-bottom:1px solid #e5e3e0;">
+            <th style="text-align:left;padding:8px 12px;font-weight:600;color:#5B21B6;white-space:nowrap;">Mês</th>
+            ${CAP.projects.map(p=>`<th style="text-align:right;padding:8px 10px;font-weight:500;color:#555;white-space:nowrap;">${p.name.replace(' – UAs','')} (un.)</th>`).join('')}
+            <th style="text-align:right;padding:8px 10px;font-weight:600;color:#5B21B6;white-space:nowrap;">Horas DI</th>
+            <th style="text-align:right;padding:8px 10px;font-weight:600;color:#065F46;white-space:nowrap;">Horas CQ</th>
+            <th style="text-align:right;padding:8px 10px;font-weight:600;color:#5B21B6;white-space:nowrap;">Pess. DI</th>
+            <th style="text-align:right;padding:8px 10px;font-weight:600;color:#065F46;white-space:nowrap;">Pess. CQ</th>
+          </tr>
+        </thead>
+        <tbody id="capTableBody"></tbody>
+      </table>
+    </div>
+  </div>`;
+
+  // Populate table
+  const tbody = panel.querySelector('#capTableBody');
+  months12.forEach((m,i)=>{
+    const even = i%2===0;
+    const row = document.createElement('tr');
+    row.style.background = even ? '#fafaf9' : '#fff';
+    row.innerHTML = `
+      <td style="padding:7px 12px;font-weight:500;color:#1a1917;">${m}</td>
+      ${CAP.projects.map((_,pi)=>`<td style="text-align:right;padding:7px 10px;color:#555;">${CAP.projects[pi].planned[i]}</td>`).join('')}
+      <td style="text-align:right;padding:7px 10px;font-weight:500;color:#5B21B6;">${fmt1(diTotal[i])}</td>
+      <td style="text-align:right;padding:7px 10px;font-weight:500;color:#065F46;">${fmt1(cqTotal[i])}</td>
+      <td style="text-align:right;padding:7px 10px;color:#7C3AED;">${fmt2(diPeople[i])}</td>
+      <td style="text-align:right;padding:7px 10px;color:#059669;">${fmt2(cqPeople[i])}</td>`;
+    tbody.appendChild(row);
+  });
+
+  // Charts rendered lazily on first tab activation (canvas must be visible for Chart.js)
+  _renderCapCharts = function(){
+    const barOpts = (label,unit) => ({
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmt1(ctx.parsed.y)}${unit}`}},
+        datalabels:{
+          display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0,
+          anchor:'center',align:'center',font:{size:9,weight:'700'},
+          color:'#fff',formatter:v=>v>0?v+unit:''
+        }
+      },
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},
+        y:{stacked:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>v+'h'}}
+      }
+    });
+
+    // DI stacked bar
+    new Chart(document.getElementById('capDIchart'),{
+      type:'bar',
+      data:{
+        labels:months12,
+        datasets: CAP.projects.map((p,pi)=>({
+          label: p.name.replace(' – UAs',''),
+          data: diByProj[pi],
+          backgroundColor: p.color,
+          borderRadius:2,
+        }))
+      },
+      options: barOpts('DI','h')
+    });
+
+    // CQ stacked bar
+    new Chart(document.getElementById('capCQchart'),{
+      type:'bar',
+      data:{
+        labels:months12,
+        datasets: CAP.projects.map((p,pi)=>({
+          label: p.name.replace(' – UAs',''),
+          data: cqByProj[pi],
+          backgroundColor: p.color,
+          borderRadius:2,
+        }))
+      },
+      options: barOpts('CQ','h')
+    });
+
+    // People line chart
+    new Chart(document.getElementById('capPplChart'),{
+      type:'line',
+      data:{
+        labels:months12,
+        datasets:[
+          { label:'DI – pessoas', data:diPeople, borderColor:'#5B21B6', backgroundColor:'#5B21B620',
+            borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#5B21B6', fill:true, tension:.3 },
+          { label:'CQ – pessoas', data:cqPeople, borderColor:'#059669', backgroundColor:'#05966920',
+            borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#059669', fill:true, tension:.3 },
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        layout:{padding:{top:22}},
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmt2(ctx.parsed.y)} pess.`}},
+          datalabels:{
+            display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0,
+            anchor:'top',align:'top',font:{size:9,weight:'700'},
+            color:(ctx)=>ctx.datasetIndex===0?'#5B21B6':'#059669',
+            formatter:v=>v.toFixed(1),clip:false
+          }
+        },
+        scales:{
+          x:{grid:{display:false},ticks:{font:{size:10}}},
+          y:{min:0,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>v+' pess.'}}
+        }
+      }
+    });
+  };
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+buildTabs();
+buildOverview();
+GROUPS.forEach(g=>buildGroupTab(g));
+buildCapacidadeTab();
+</script>
+</body>
+</html>
